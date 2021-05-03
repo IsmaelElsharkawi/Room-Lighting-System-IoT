@@ -50,39 +50,49 @@ void turn_on_off(int pin_LDR_no, int pin_out_no, int room_channel){
 }
 
 void turn_on_off_green_schedule(){
-  if(month()=5 && day()==3 && hour()==1 && minute()==5 && second()>=30){
+  if(month()==5 && day()==3 && hour()==1 && minute()==5 && second()>=30){
       digitalWrite(green_LED, HIGH);
+      flag_set_from_button[0] = 1;
   }
-  if(month()=5 && day()==3 && hour()==1 && minute()==5 && second()>=30){
+  if(month()==5 && day()==3 && hour()==1 && minute()==5 && second()>=30){
       digitalWrite(green_LED, LOW);
+      flag_set_from_button[0] = 0;
   }
 }
 
 void turn_on_off_yellow_schedule(){
-  if(month()=5 && day()==3 && hour()==1 && minute()==5 && second()>=30){
+  if(month()==5 && day()==3 && hour()==1 && minute()==5 && second()>=30){
       digitalWrite(yellow_LED, HIGH);
+      flag_set_from_button[1] = 1;
   }
-  if(month()=5 && day()==3 && hour()==1 && minute()==5 && second()>=30){
+  if(month()==5 && day()==3 && hour()==1 && minute()==5 && second()>=30){
       digitalWrite(yellow_LED, LOW);
+      flag_set_from_button[1] = 0;
   }
 }
 
 void turn_on_off_blue_schedule(){
-  if(month()=5 && day()==3 && hour()==1 && minute()==5 && second()>=30){
+  if(month()==5 && day()==3 && hour()==1 && minute()==5 && second()>=30){
       digitalWrite(blue_LED, HIGH);
+      flag_set_from_button[2] = 1;
   }
-  if(month()=5 && day()==3 && hour()==1 && minute()==5 && second()>=30){
+  if(month()==5 && day()==3 && hour()==1 && minute()==5 && second()>=30){
       digitalWrite(blue_LED, LOW);
+      flag_set_from_button[2] = 0;
   }
 }
 
 void loop() {
   Cayenne.loop();
   time2=millis();
-  turn_on_off_yellow_schedule();
+  
   turn_on_off(LDR_D0_green, green_LED, ROOM_1_CHANNEL);
   turn_on_off(LDR_D0_blue, blue_LED, ROOM_2_CHANNEL);
   turn_on_off(LDR_D0_yellow, yellow_LED, ROOM_3_CHANNEL);
+
+  turn_on_off_green_schedule();
+  turn_on_off_yellow_schedule();
+  turn_on_off_blue_schedule();
 }
 
 CAYENNE_IN(4){
