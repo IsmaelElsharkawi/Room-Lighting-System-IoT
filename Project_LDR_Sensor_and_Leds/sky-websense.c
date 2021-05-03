@@ -70,7 +70,7 @@ static int sensors_pos;
 static int
 get_light(void)
 {
-  if (10 * light_sensor.value(LIGHT_SENSOR_PHOTOSYNTHETIC) / 7 >  50) {
+  if (10 * light_sensor.value(LIGHT_SENSOR_PHOTOSYNTHETIC) / 7<  100) {
 	leds_on(LEDS_RED);
    }else{
 	leds_off(LEDS_RED);
