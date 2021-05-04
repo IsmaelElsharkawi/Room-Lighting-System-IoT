@@ -61,7 +61,7 @@ PROCESS_THREAD(webserver_nogui_process, ev, data)
 }
 AUTOSTART_PROCESSES(&web_sense_process,&webserver_nogui_process);
 
-#define HISTORY 16
+#define HISTORY 3
 static int temperature[HISTORY];
 static int light1[HISTORY];
 static int sensors_pos;
@@ -70,12 +70,7 @@ static int sensors_pos;
 static int
 get_light(void)
 {
-  if (10 * light_sensor.value(LIGHT_SENSOR_PHOTOSYNTHETIC) / 7 >  50) {
-	leds_on(LEDS_RED);
-   }else{
-	leds_off(LEDS_RED);
-   }
-  printf("Light Intensity: %d\n", 10 * light_sensor.value(LIGHT_SENSOR_PHOTOSYNTHETIC) / 7);
+  
   return 10 * light_sensor.value(LIGHT_SENSOR_PHOTOSYNTHETIC) / 7;
 }
 /*---------------------------------------------------------------------------*/
@@ -112,6 +107,7 @@ generate_chart(const char *title, const char *unit, int min, int max, int *value
 static
 PT_THREAD(send_values(struct httpd_state *s))
 {
+  
   PSOCK_BEGIN(&s->sout);
 
   SEND_STRING(&s->sout, TOP);
@@ -122,8 +118,10 @@ PT_THREAD(send_values(struct httpd_state *s))
        require Internet connection to Google for charts). */
     blen = 0;
     ADD("<h1>Current readings</h1>\n"
-        "Light: %u<br>",
-        get_light());
+        "Light Sensor 1: %u<br>\n"
+	"Light Sensor 2: %u<br>\n"
+	"Light Sensor 3: %u<br>\n",
+        light1[0],light1[1],light1[2]);
     SEND_STRING(&s->sout, buf);
 
   } else if(s->filename[1] == '0') {
@@ -164,7 +162,7 @@ PROCESS_THREAD(web_sense_process, ev, data)
   PROCESS_BEGIN();
 
   sensors_pos = 0;
-
+  int threshold = 150;
   etimer_set(&timer, CLOCK_SECOND * 2);
   SENSORS_ACTIVATE(light_sensor);
   SENSORS_ACTIVATE(sht11_sensor);
@@ -172,12 +170,54 @@ PROCESS_THREAD(web_sense_process, ev, data)
   while(1) {
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
     etimer_reset(&timer);
-
+    
     light1[sensors_pos] = get_light();;
+   
+	if( light1[sensors_pos]<threshold){
+		if(sensors_pos==0) leds_on(LEDS_RED);
+		if(sensors_pos==1) leds_on(LEDS_GREEN);
+		if(sensors_pos==2) leds_on(LEDS_BLUE);
+		printf("Sensor %d (ON) Light Intensity: %d\n",sensors_pos,light1[sensors_pos]);
+	  }else{
+		if(sensors_pos==0) leds_off(LEDS_RED);
+		if(sensors_pos==1) leds_off(LEDS_GREEN);
+		if(sensors_pos==2) leds_off(LEDS_BLUE);
+		printf("Sensor %d (OFF) Light Intensity: %d\n",sensors_pos, light1[sensors_pos]);
+	  }
+   
+
     temperature[sensors_pos] = get_temp();
     sensors_pos = (sensors_pos + 1) % HISTORY;
   }
 
   PROCESS_END();
 }
+/*int light_1 = get_light();
+  int light_2 = get_light();
+  int light_3 = get_light();
+  int threshold = 150; 
+  if(light_1<threshold){
+	leds_on(LEDS_RED);
+	printf("Sensor 1 Light Intensity: %d\n", light_1);
+  }else{
+	leds_off(LEDS_RED);
+	printf("Sensor 1 OFF Light Intensity: %d\n", light_1);
+  }
+
+  if(light_2<threshold){
+	leds_on(LEDS_BLUE);
+	printf("Sensor 2 Light Intensity: %d\n", light_2);
+  }else{
+	leds_off(LEDS_BLUE);
+	printf("Sensor 2 OFF Light Intensity: %d\n", light_2);
+  }
+
+  if(light_3<threshold){
+	leds_on(LEDS_GREEN);
+	printf("Sensor 3 Light Intensity: %d\n", light_3);
+  }else{
+	leds_off(LEDS_GREEN);
+	printf("Sensor 3 OFF Light Intensity: %d\n", light_3);
+  }
+*/
 /*---------------------------------------------------------------------------*/
